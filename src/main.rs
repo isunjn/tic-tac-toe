@@ -1,14 +1,14 @@
 extern crate termion;
 
-use std::io::{stdin, stdout, Write};
-use std::process;
-use std::usize;
-
 use termion::event::Key;
 use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 
-#[derive(Copy, Clone)]
+use std::io::{stdin, stdout};
+use std::process;
+use std::usize;
+
+#[derive(Copy, Clone, PartialEq)]
 enum Piece {
     Empty,
     X,
@@ -73,7 +73,7 @@ impl Game {
                         Piece::Empty => {
                             self.turn = 0;
                             Piece::X
-                        },
+                        }
                         Piece::O => Piece::O,
                         Piece::X => Piece::X,
                     };
@@ -102,39 +102,65 @@ impl Game {
             _ => " ",
         };
 
-        let mut stdout = stdout().into_raw_mode().unwrap();
-        write!(
-            stdout,
-            "{}{}Tic-Tac-Toe  <q> to exit.{}\n\r   {}'s turn\n\r",// TODO better ui
-            termion::clear::All,
-            termion::cursor::Goto(2, 1),
-            termion::cursor::Hide,
+        print!("{}{}", termion::clear::All, termion::cursor::Goto(1, 1));
+        print!("\n\r  ────────── Tic-Tac-Toe ──────────  \n\r\n\r");
+        print!(
+            "      {} │ {} │ {}      \x1b[32m↑/↓/←/→\x1b[0m to move\n\r     ───┼───┼───     \x1b[32mo/x\x1b[0m to set piece\n\r      {} │ {} │ {}      \x1b[32mq\x1b[0m to quit\n\r     ───┼───┼───\n\r      {} │ {} │ {}      \x1b[34m{}\x1b[0m's turn\n\r",
+            ox[0], ox[1], ox[2], ox[3], ox[4], ox[5], ox[6], ox[7], ox[8],
             match self.turn {
                 0 => 'O',
                 1 => 'X',
                 _ => ' ',
             }
-        )
-        .unwrap();
-        write!(
-            stdout,
-            " {} | {} | {} \n\r───┼───┼───\n\r {} | {} | {} \n\r───┼───┼───\n\r {} | {} | {} \n\r",
-            ox[0], ox[1], ox[2], ox[3], ox[4], ox[5], ox[6], ox[7], ox[8]
-        )
-        .unwrap();
-        stdout.flush().unwrap();
+        );
     }
 
-    fn is_over(&self) {
-        
+    fn is_over(&self) -> bool {
+        let board = self.board;
+        if (board[0] == board[1] && board[0] == board[2] && board[1] == board[2] && board[2] == Piece::O)
+        || (board[3] == board[4] && board[3] == board[5] && board[4] == board[5] && board[5] == Piece::O)
+        || (board[6] == board[7] && board[6] == board[8] && board[7] == board[8] && board[8] == Piece::O)
+        || (board[0] == board[4] && board[0] == board[8] && board[4] == board[8] && board[8] == Piece::O)
+        || (board[2] == board[4] && board[2] == board[6] && board[4] == board[6] && board[6] == Piece::O)
+        || (board[0] == board[3] && board[0] == board[6] && board[3] == board[6] && board[6] == Piece::O)
+        || (board[1] == board[4] && board[1] == board[7] && board[4] == board[7] && board[7] == Piece::O)
+        || (board[2] == board[5] && board[2] == board[8] && board[5] == board[8] && board[8] == Piece::O)
+        {
+            print!("\n\x1b[34m               O wins!\x1b[0m");
+            return true;
+        }
+        if (board[0] == board[1] && board[0] == board[2] && board[1] == board[2] && board[2] == Piece::X)
+        || (board[3] == board[4] && board[3] == board[5] && board[4] == board[5] && board[5] == Piece::X)
+        || (board[6] == board[7] && board[6] == board[8] && board[7] == board[8] && board[8] == Piece::X)
+        || (board[0] == board[4] && board[0] == board[8] && board[4] == board[8] && board[8] == Piece::X)
+        || (board[2] == board[4] && board[2] == board[6] && board[4] == board[6] && board[6] == Piece::X)
+        || (board[0] == board[3] && board[0] == board[6] && board[3] == board[6] && board[6] == Piece::X)
+        || (board[1] == board[4] && board[1] == board[7] && board[4] == board[7] && board[7] == Piece::X)
+        || (board[2] == board[5] && board[2] == board[8] && board[5] == board[8] && board[8] == Piece::X)
+        {
+            print!("\n\x1b[34m               X wins!\x1b[0m");
+            return true;
+        }
+
+        for piece in board.iter() {
+            if *piece == Piece::Empty {
+                return false;
+            }
+        }
+        print!("\n\x1b[34m               Draw!\x1b[0m");
+        return true;
     }
 }
 
 fn main() {
     let mut game = Game::new();
+    print!("{}", termion::cursor::Hide);
     loop {
         game.draw_board();
         game.update_board();
-        game.is_over();
+        if game.is_over() {
+            print!("{}", termion::cursor::Show);
+            break;
+        }
     }
 }
