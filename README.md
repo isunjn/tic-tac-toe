@@ -1,1 +1,1 @@
-A simple terminal tic-tac-toe game implemented by rust.
+A simple terminal tic-tac-toe game implemented in rust.
