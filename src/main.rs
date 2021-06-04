@@ -4,7 +4,7 @@ use termion::event::Key;
 use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 
-use std::io::{stdin, stdout};
+use std::io::{stdin, stdout, Write};
 use std::process;
 use std::usize;
 
@@ -31,7 +31,6 @@ impl Game {
     }
 
     fn update_board(&mut self) {
-        let _stdout = stdout().into_raw_mode().unwrap();
         let pos = (self.pos.0 * 3 + self.pos.1) as usize;
         match stdin().keys().next().unwrap().unwrap() {
             Key::Char('q') => process::exit(0),
@@ -126,7 +125,7 @@ impl Game {
         || (board[1] == board[4] && board[1] == board[7] && board[4] == board[7] && board[7] == Piece::O)
         || (board[2] == board[5] && board[2] == board[8] && board[5] == board[8] && board[8] == Piece::O)
         {
-            print!("\n\x1b[34m               O wins!\x1b[0m");
+            print!("\n\r\x1b[34m               O wins!\n\r\x1b[0m");
             return true;
         }
         if (board[0] == board[1] && board[0] == board[2] && board[1] == board[2] && board[2] == Piece::X)
@@ -138,7 +137,7 @@ impl Game {
         || (board[1] == board[4] && board[1] == board[7] && board[4] == board[7] && board[7] == Piece::X)
         || (board[2] == board[5] && board[2] == board[8] && board[5] == board[8] && board[8] == Piece::X)
         {
-            print!("\n\x1b[34m               X wins!\x1b[0m");
+            print!("\n\r\x1b[34m               X wins!\n\r\x1b[0m");
             return true;
         }
 
@@ -147,19 +146,20 @@ impl Game {
                 return false;
             }
         }
-        print!("\n\x1b[34m               Draw!\x1b[0m");
+        print!("\n\r\x1b[34m               Draw!\n\r\x1b[0m");
         return true;
     }
 }
 
 fn main() {
+    let mut stdout = stdout().into_raw_mode().unwrap();
+    write!(stdout, "{}", termion::cursor::Hide).unwrap();
     let mut game = Game::new();
-    print!("{}", termion::cursor::Hide);
     loop {
         game.draw_board();
         game.update_board();
         if game.is_over() {
-            print!("{}", termion::cursor::Show);
+            write!(stdout, "{}", termion::cursor::Show).unwrap();
             break;
         }
     }
