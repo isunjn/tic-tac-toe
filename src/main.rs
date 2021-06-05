@@ -134,7 +134,14 @@ impl Game {
                     return true;
                 }
                 (p_1, p_2, p_3) => {
-                    if p_1 == Piece::Empty && p_2 == Piece::Empty && p_3 == Piece::Empty {
+                    let mut piece_type_cnt = 0;
+                    if p_1 == Piece::O || p_2 == Piece::O || p_3 == Piece::O {
+                        piece_type_cnt += 1;
+                    }
+                    if p_1 == Piece::X || p_2 == Piece::X || p_3 == Piece::X {
+                        piece_type_cnt += 1;
+                    }
+                    if piece_type_cnt < 2 {
                         no_one_can_win = false;
                     }
                 }
