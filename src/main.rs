@@ -18,7 +18,7 @@ enum Piece {
 struct Game {
     board: [Piece; 9],
     pos: (u32, u32),
-    turn: u32,
+    turn: Piece,
 }
 
 impl Game {
@@ -26,7 +26,7 @@ impl Game {
         Game {
             board: [Piece::Empty; 9],
             pos: (1, 1),
-            turn: 0,
+            turn: Piece::O,
         }
     }
 
@@ -55,10 +55,10 @@ impl Game {
                 }
             }
             Key::Char('o') => {
-                if self.turn == 0 {
+                if self.turn == Piece::O {
                     self.board[pos] = match self.board[pos] {
                         Piece::Empty => {
-                            self.turn = 1;
+                            self.turn = Piece::X;
                             Piece::O
                         }
                         Piece::O => Piece::O,
@@ -67,16 +67,15 @@ impl Game {
                 }
             }
             Key::Char('x') => {
-                if self.turn == 1 {
+                if self.turn == Piece::X {
                     self.board[pos] = match self.board[pos] {
                         Piece::Empty => {
-                            self.turn = 0;
+                            self.turn = Piece::O;
                             Piece::X
                         }
                         Piece::O => Piece::O,
                         Piece::X => Piece::X,
                     };
-                    self.turn = 0;
                 }
             }
             _ => {}
@@ -107,8 +106,8 @@ impl Game {
             "      {} │ {} │ {}      \x1b[32m↑/↓/←/→\x1b[0m to move\n\r     ───┼───┼───     \x1b[32mo/x\x1b[0m to set piece\n\r      {} │ {} │ {}      \x1b[32mq\x1b[0m to quit\n\r     ───┼───┼───\n\r      {} │ {} │ {}      \x1b[34m{}\x1b[0m's turn\n\r",
             ox[0], ox[1], ox[2], ox[3], ox[4], ox[5], ox[6], ox[7], ox[8],
             match self.turn {
-                0 => 'O',
-                1 => 'X',
+                Piece::O => 'O',
+                Piece::X => 'X',
                 _ => ' ',
             }
         );
