@@ -28,7 +28,7 @@ static CHECK_POS: [(usize, usize, usize); 8] = [
 
 struct Game {
     board: [Piece; 9],
-    pos: (u32, u32),
+    pos: (i32, i32),
     turn: Piece,
 }
 
