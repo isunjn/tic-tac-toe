@@ -35,49 +35,29 @@ impl Game {
         match stdin().keys().next().unwrap().unwrap() {
             Key::Char('q') => process::exit(0),
             Key::Left => {
-                if self.pos.1 != 0 {
-                    self.pos.1 -= 1;
-                }
-            }
+                self.pos.1 = (self.pos.1 - 1 + 3) % 3;
+            },
             Key::Right => {
-                if self.pos.1 != 2 {
-                    self.pos.1 += 1;
-                }
-            }
+                self.pos.1 = (self.pos.1 + 1) % 3;
+            },
             Key::Up => {
-                if self.pos.0 != 0 {
-                    self.pos.0 -= 1;
-                }
-            }
+                self.pos.0 = (self.pos.0 - 1 + 3) % 3;
+            },
             Key::Down => {
-                if self.pos.0 != 2 {
-                    self.pos.0 += 1;
-                }
-            }
+                self.pos.0 = (self.pos.0 + 1) % 3;
+            },
             Key::Char('o') => {
-                if self.turn == Piece::O {
-                    self.board[pos] = match self.board[pos] {
-                        Piece::Empty => {
-                            self.turn = Piece::X;
-                            Piece::O
-                        }
-                        Piece::O => Piece::O,
-                        Piece::X => Piece::X,
-                    };
+                if self.turn == Piece::O && self.board[pos] == Piece::Empty {
+                    self.board[pos] = Piece::O;
+                    self.turn = Piece::X;
                 }
-            }
+            },
             Key::Char('x') => {
-                if self.turn == Piece::X {
-                    self.board[pos] = match self.board[pos] {
-                        Piece::Empty => {
-                            self.turn = Piece::O;
-                            Piece::X
-                        }
-                        Piece::O => Piece::O,
-                        Piece::X => Piece::X,
-                    };
+                if self.turn == Piece::X && self.board[pos] == Piece::Empty {
+                    self.board[pos] = Piece::X;
+                    self.turn = Piece::O;
                 }
-            }
+            },
             _ => {}
         }
     }
