@@ -5,7 +5,6 @@ use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 
 use std::io::{stdin, stdout, Write};
-use std::process;
 use std::usize;
 
 #[derive(Copy, Clone, PartialEq)]
@@ -41,10 +40,12 @@ impl Game {
         }
     }
 
-    fn update_board(&mut self) {
+    fn update_board(&mut self) -> Result<(), ()> {
         let pos = (self.pos.0 * 3 + self.pos.1) as usize;
         match stdin().keys().next().unwrap().unwrap() {
-            Key::Char('q') => process::exit(0),
+            Key::Char('q') => {
+                return Err(());
+            }
             Key::Left => {
                 self.pos.1 = (self.pos.1 - 1 + 3) % 3;
             }
@@ -71,6 +72,7 @@ impl Game {
             }
             _ => {}
         }
+        Ok(())
     }
 
     fn draw_board(&self) {
@@ -162,10 +164,12 @@ fn main() {
     let mut game = Game::new();
     loop {
         game.draw_board();
-        game.update_board();
+        if let Err(_) = game.update_board() {
+            break;
+        }
         if game.is_over() {
-            write!(stdout, "{}", termion::cursor::Show).unwrap();
             break;
         }
     }
+    write!(stdout, "{}", termion::cursor::Show).unwrap();
 }
