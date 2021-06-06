@@ -49,7 +49,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "tic-tac-toe"
+name = "tic-tac-toe-game"
 version = "0.1.0"
 dependencies = [
  "termion",
