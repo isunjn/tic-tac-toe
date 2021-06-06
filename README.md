@@ -1,5 +1,7 @@
 A simple terminal tic-tac-toe game written in rust.
 
-Play: `cargo run`
+Install: `cargo install tic-tac-toe`
+
+Play: `ttt`
 
 ![](screenshot.png)
