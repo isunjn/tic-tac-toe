@@ -27,7 +27,7 @@ static CHECK_POS: [(usize, usize, usize); 8] = [
 
 struct Game {
     board: [Piece; 9],
-    pos: (i32, i32),
+    pos: usize,
     turn: Piece,
     quit: bool,
     winner: Option<Piece>,
@@ -37,7 +37,7 @@ impl Game {
     fn new() -> Game {
         Game {
             board: [Piece::Empty; 9],
-            pos: (1, 1),
+            pos: 4,
             turn: Piece::O,
             quit: false,
             winner: None,
@@ -45,26 +45,61 @@ impl Game {
     }
 
     fn update_board(&mut self) {
-        let pos = (self.pos.0 * 3 + self.pos.1) as usize;
-        match stdin().keys().next().unwrap().unwrap() {
-            Key::Char('q') => self.quit = true,
-            Key::Left => self.pos.1 = (self.pos.1 - 1 + 3) % 3,
-            Key::Right => self.pos.1 = (self.pos.1 + 1) % 3,
-            Key::Up => self.pos.0 = (self.pos.0 - 1 + 3) % 3,
-            Key::Down => self.pos.0 = (self.pos.0 + 1) % 3,
-            Key::Char('o') => {
-                if self.turn == Piece::O && self.board[pos] == Piece::Empty {
-                    self.board[pos] = Piece::O;
-                    self.turn = Piece::X;
+        let pos = self.pos;
+        loop {
+            match stdin().keys().next().unwrap().unwrap() {
+                Key::Char('q') => {
+                    self.quit = true;
+                    break;
                 }
-            }
-            Key::Char('x') => {
-                if self.turn == Piece::X && self.board[pos] == Piece::Empty {
-                    self.board[pos] = Piece::X;
-                    self.turn = Piece::O;
+                Key::Left => {
+                    if pos % 3 == 0 {
+                        self.pos += 2
+                    } else {
+                        self.pos -= 1
+                    }
+                    break;
                 }
+                Key::Right => {
+                    if pos % 3 == 2 {
+                        self.pos -= 2
+                    } else {
+                        self.pos += 1
+                    }
+                    break;
+                }
+                Key::Up => {
+                    if pos < 3 {
+                        self.pos += 6
+                    } else {
+                        self.pos -= 3
+                    }
+                    break;
+                }
+                Key::Down => {
+                    if pos > 5 {
+                        self.pos -= 6
+                    } else {
+                        self.pos += 3
+                    }
+                    break;
+                }
+                Key::Char('o') => {
+                    if self.turn == Piece::O && self.board[pos] == Piece::Empty {
+                        self.board[pos] = Piece::O;
+                        self.turn = Piece::X;
+                        break;
+                    }
+                }
+                Key::Char('x') => {
+                    if self.turn == Piece::X && self.board[pos] == Piece::Empty {
+                        self.board[pos] = Piece::X;
+                        self.turn = Piece::O;
+                        break;
+                    }
+                }
+                _ => (),
             }
-            _ => ()
         }
     }
 
@@ -78,12 +113,16 @@ impl Game {
                 Piece::X => "X",
             })
             .collect();
-        let pos = (self.pos.0 * 3 + self.pos.1) as usize;
-        pieces[pos] = match pieces[pos] {
+        pieces[self.pos] = match pieces[self.pos] {
             " " => "\x1b[34m+\x1b[0m",
             "O" => "\x1b[34mO\x1b[0m",
             "X" => "\x1b[34mX\x1b[0m",
             _ => " ",
+        };
+        let turn = match self.turn {
+            Piece::O => 'O',
+            Piece::X => 'X',
+            Piece::Empty => ' ',
         };
 
         let ui_1 = format!(
@@ -98,14 +137,7 @@ impl Game {
         let ui_4 = format!("     ───┼───┼───\n\r");
         let ui_5 = format!(
             "      {} │ {} │ {}      \x1b[34m{}\x1b[0m's turn\n\r",
-            pieces[6],
-            pieces[7],
-            pieces[8],
-            match self.turn {
-                Piece::O => 'O',
-                Piece::X => 'X',
-                Piece::Empty => ' ',
-            }
+            pieces[6], pieces[7], pieces[8], turn
         );
 
         print!("{}{}", termion::clear::All, termion::cursor::Goto(1, 1));
